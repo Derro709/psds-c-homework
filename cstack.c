@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define UNUSED(VAR) (void)(VAR)
 
 struct node
 {
