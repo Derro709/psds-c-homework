@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 struct node
 {
     struct node* prev;
