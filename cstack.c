@@ -60,17 +60,17 @@ hstack_t stack_new(void)
         return -1;
     }
     s_table.entries = tmp;
-    for (unsigned int i = s_table.size; i < new_size;
-         ++i) // обнуление новых данных
-    {
-        s_table.entries[i].reserved = 0;
-        s_table.entries[i].stack = NULL;
-    }
     hstack_t hstack =
         s_table.size; // выделение места под стек в новом пространстве
     s_table.size = new_size;
     s_table.entries[hstack].reserved = 1;
     s_table.entries[hstack].stack = NULL;
+    for (unsigned int i = hstack + 1; i < new_size;
+         ++i) // обнуление новых данных
+    {
+        s_table.entries[i].reserved = 0;
+        s_table.entries[i].stack = NULL;
+    }
     return hstack;
 }
 
@@ -128,22 +128,28 @@ unsigned int stack_size(const hstack_t hstack)
     return size;
 }
 
-void
-stack_push(const hstack_t hstack, const void* data_in, const unsigned int size)
+// Внутренняя функция, возвращает 1 при успехе, 0 при ошибке
+static int stack_push_impl(const hstack_t hstack, const void* data_in, const unsigned int size)
 {
     if (stack_valid_handler(hstack) == 0 || data_in == NULL || size == 0)
     {
-        return;
+        return 0;
     }
     stack_t node = malloc(sizeof(*node) + size);
     if (node == NULL)
     {
-        return;
+        return 0;
     }
     node->prev = s_table.entries[hstack].stack;
     node->size = size;
     memcpy(node->data, data_in, size);
     s_table.entries[hstack].stack = node;
+    return 1;
+}
+
+void stack_push(const hstack_t hstack, const void* data_in, const unsigned int size)
+{
+    (void)stack_push_impl(hstack, data_in, size);
 }
 
 unsigned int
@@ -175,6 +181,8 @@ unsigned stack_top_size(const hstack_t hstack)
     return s_table.entries[hstack].stack->size;
 }
 
+
+
 hstack_t stack_get_all(void)
 {
     hstack_t all_stack = stack_new();
@@ -186,9 +194,8 @@ hstack_t stack_get_all(void)
     {
         if (stack_valid_handler(i) && i != (unsigned int)all_stack)
         {
-            unsigned int old_size = stack_size(all_stack);
-            stack_push(all_stack, &i, sizeof(hstack_t));
-            if (stack_size(all_stack) == old_size)
+            hstack_t h = (hstack_t)i;
+            if (!stack_push_impl(all_stack, &h, sizeof(hstack_t)))
             {
                 stack_free(all_stack);
                 return -1;
