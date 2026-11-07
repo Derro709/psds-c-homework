@@ -129,7 +129,9 @@ unsigned int stack_size(const hstack_t hstack)
 }
 
 // Внутренняя функция, возвращает 1 при успехе, 0 при ошибке
-static int stack_push_impl(const hstack_t hstack, const void* data_in, const unsigned int size)
+static int stack_push_impl(
+    const hstack_t hstack, const void* data_in, const unsigned int size
+)
 {
     if (stack_valid_handler(hstack) == 0 || data_in == NULL || size == 0)
     {
@@ -147,7 +149,8 @@ static int stack_push_impl(const hstack_t hstack, const void* data_in, const uns
     return 1;
 }
 
-void stack_push(const hstack_t hstack, const void* data_in, const unsigned int size)
+void
+stack_push(const hstack_t hstack, const void* data_in, const unsigned int size)
 {
     (void)stack_push_impl(hstack, data_in, size);
 }
@@ -180,8 +183,6 @@ unsigned stack_top_size(const hstack_t hstack)
     }
     return s_table.entries[hstack].stack->size;
 }
-
-
 
 hstack_t stack_get_all(void)
 {
